@@ -2,98 +2,140 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gym Routine Tracker 💪</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f0f0f0; }
-    h1 { color: #2c3e50; }
-    select, input, button { margin: 5px 0; padding: 8px; width: 100%; }
-    .output { margin-top: 20px; white-space: pre-wrap; background: #fff; padding: 10px; border-radius: 5px; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    header { text-align: center; margin-bottom: 20px; }
+    nav button { margin: 5px; padding: 10px 15px; font-size: 1rem; }
+    section { margin-top: 20px; }
+    form { margin-bottom: 15px; }
+    label { display: block; margin: 5px 0 2px; }
+    input, select { width: 100%; padding: 5px; margin-bottom: 10px; }
+    ul { list-style: none; padding: 0; }
+    ul li { background: #f3f3f3; margin: 5px 0; padding: 10px; border-radius: 4px; }
   </style>
 </head>
 <body>
-
-  <h1>GYM ROUTINE TRACKER 💪</h1>
-
-  <label for="opcion">Elige una opción:</label>
-  <select id="opcion">
-    <option value="1">1. Ver rutina del día</option>
-    <option value="2">2. Agregar ejercicio a un día</option>
-  </select>
-
-  <div id="formulario">
-    <!-- Aquí se cargan los formularios dinámicamente -->
-  </div>
-
-  <div class="output" id="salida"></div>
-
+  <header>
+    <h1>Gym Routine Tracker 💪</h1>
+  </header>
+  <nav>
+    <button onclick="viewRoutine()">Ver rutina del día</button>
+    <button onclick="addExercise()">Agregar ejercicio</button>
+    <button onclick="deleteExercise()">Eliminar ejercicio</button>
+    <button onclick="modifyExercise()">Modificar ejercicio</button>
+    <button onclick="listDays()">Listar días con rutinas</button>
+  </nav>
+  <section id="content">
+    <p>Selecciona una opción para comenzar.</p>
+  </section>
   <script>
-    const rutinas = {
-      lunes: [
-        { ejercicio: "Sentadillas", series: 3, repeticiones: 12, peso: 50 },
-        { ejercicio: "Press de banca", series: 4, repeticiones: 10, peso: 40 }
-      ],
-      martes: [
-        { ejercicio: "Remo con barra", series: 3, repeticiones: 10, peso: 35 }
-      ]
-    };
+    const rutinas = {};
 
-    const opcionSelect = document.getElementById('opcion');
-    const formularioDiv = document.getElementById('formulario');
-    const salidaDiv = document.getElementById('salida');
-
-    opcionSelect.addEventListener('change', mostrarFormulario);
-    mostrarFormulario();
-
-    function mostrarFormulario() {
-      const opcion = opcionSelect.value;
-      formularioDiv.innerHTML = '';
-      salidaDiv.textContent = '';
-
-      if (opcion === '1') {
-        formularioDiv.innerHTML = `
-          <input type="text" id="diaConsulta" placeholder="¿Qué día quieres ver? (ej: lunes)">
-          <button onclick="verRutina()">Ver rutina</button>
-        `;
-      } else if (opcion === '2') {
-        formularioDiv.innerHTML = `
-          <input type="text" id="diaNuevo" placeholder="Día (ej: miercoles)">
-          <input type="text" id="ejercicio" placeholder="Nombre del ejercicio">
-          <input type="number" id="series" placeholder="Número de series">
-          <input type="number" id="repeticiones" placeholder="Número de repeticiones">
-          <input type="number" step="0.1" id="peso" placeholder="Peso (kg)">
-          <button onclick="agregarEjercicio()">Agregar ejercicio</button>
-        `;
-      }
+    function clearContent() {
+      document.getElementById('content').innerHTML = '';
     }
 
-    function verRutina() {
-      const dia = document.getElementById('diaConsulta').value.toLowerCase();
-      if (rutinas[dia] && rutinas[dia].length > 0) {
-        let texto = `Rutina para ${dia.charAt(0).toUpperCase() + dia.slice(1)}:\n`;
-        rutinas[dia].forEach(e => {
-          texto += `- ${e.ejercicio} | ${e.series}x${e.repeticiones} @ ${e.peso} kg\n`;
+    function viewRoutine() {
+      clearContent();
+      const content = document.getElementById('content');
+      const dia = prompt('¿Qué día quieres ver? (ej: lunes)').toLowerCase();
+      const ejercicios = rutinas[dia];
+      if (ejercicios && ejercicios.length) {
+        const title = document.createElement('h2');
+        title.textContent = `Rutina para ${dia.charAt(0).toUpperCase() + dia.slice(1)}`;
+        content.appendChild(title);
+        const list = document.createElement('ul');
+        ejercicios.forEach((e, i) => {
+          const li = document.createElement('li');
+          li.textContent = `${i+1}. ${e.ejercicio} | ${e.series}x${e.repeticiones} @ ${e.peso} kg`;
+          list.appendChild(li);
         });
-        salidaDiv.textContent = texto;
+        content.appendChild(list);
       } else {
-        salidaDiv.textContent = "No hay ejercicios guardados para ese día.";
+        content.textContent = 'No hay ejercicios guardados para ese día.';
       }
     }
 
-    function agregarEjercicio() {
-      const dia = document.getElementById('diaNuevo').value.toLowerCase();
-      const ejercicio = document.getElementById('ejercicio').value;
-      const series = parseInt(document.getElementById('series').value);
-      const repeticiones = parseInt(document.getElementById('repeticiones').value);
-      const peso = parseFloat(document.getElementById('peso').value);
-
-      const nuevo = { ejercicio, series, repeticiones, peso };
-
+    function addExercise() {
+      clearContent();
+      const dia = prompt('¿A qué día quieres agregar un ejercicio?').toLowerCase();
+      const ejercicio = prompt('Nombre del ejercicio:');
+      const series = parseInt(prompt('Número de series:'), 10);
+      const repeticiones = parseInt(prompt('Número de repeticiones:'), 10);
+      const peso = parseFloat(prompt('Peso (kg):'));
       if (!rutinas[dia]) rutinas[dia] = [];
-      rutinas[dia].push(nuevo);
+      rutinas[dia].push({ ejercicio, series, repeticiones, peso });
+      alert(`✅ Se agregó '${ejercicio}' a la rutina del ${dia}.`);
+    }
 
-      salidaDiv.textContent = `✅ Se agregó '${ejercicio}' a la rutina del ${dia}.`;
+    function deleteExercise() {
+      clearContent();
+      const dia = prompt('¿De qué día quieres eliminar un ejercicio?').toLowerCase();
+      const ejercicios = rutinas[dia];
+      if (ejercicios && ejercicios.length) {
+        let msg = `Ejercicios para ${dia}:\n`;
+        ejercicios.forEach((e, i) => {
+          msg += `${i+1}. ${e.ejercicio} | ${e.series}x${e.repeticiones} @ ${e.peso} kg\n`;
+        });
+        const idx = parseInt(prompt(msg + 'Ingresa el número a eliminar:'), 10);
+        if (idx > 0 && idx <= ejercicios.length) {
+          const eliminado = ejercicios.splice(idx-1, 1)[0];
+          if (!ejercicios.length) delete rutinas[dia];
+          alert(`❌ Se eliminó '${eliminado.ejercicio}' del ${dia}.`);
+        } else {
+          alert('Índice inválido.');
+        }
+      } else {
+        alert('No hay ejercicios para ese día.');
+      }
+    }
+
+    function modifyExercise() {
+      clearContent();
+      const dia = prompt('¿De qué día quieres modificar un ejercicio?').toLowerCase();
+      const ejercicios = rutinas[dia];
+      if (ejercicios && ejercicios.length) {
+        let msg = `Ejercicios para ${dia}:\n`;
+        ejercicios.forEach((e, i) => {
+          msg += `${i+1}. ${e.ejercicio} | ${e.series}x${e.repeticiones} @ ${e.peso} kg\n`;
+        });
+        const idx = parseInt(prompt(msg + 'Ingresa el número a modificar:'), 10);
+        if (idx > 0 && idx <= ejercicios.length) {
+          const e = ejercicios[idx-1];
+          e.series = parseInt(prompt(`Nuevas series (actual: ${e.series}):`), 10);
+          e.repeticiones = parseInt(prompt(`Nuevas repeticiones (actual: ${e.repeticiones}):`), 10);
+          e.peso = parseFloat(prompt(`Nuevo peso (kg) (actual: ${e.peso}):`));
+          alert('🔄 Ejercicio actualizado.');
+        } else {
+          alert('Índice inválido.');
+        }
+      } else {
+        alert('No hay ejercicios para ese día.');
+      }
+    }
+
+    function listDays() {
+      clearContent();
+      const content = document.getElementById('content');
+      if (Object.keys(rutinas).length) {
+        for (const dia in rutinas) {
+          const title = document.createElement('h3');
+          title.textContent = dia.charAt(0).toUpperCase() + dia.slice(1);
+          content.appendChild(title);
+          const list = document.createElement('ul');
+          rutinas[dia].forEach(e => {
+            const li = document.createElement('li');
+            li.textContent = `${e.ejercicio} | ${e.series}x${e.repeticiones} @ ${e.peso} kg`;
+            list.appendChild(li);
+          });
+          content.appendChild(list);
+        }
+      } else {
+        content.textContent = 'No hay rutinas guardadas.';
+      }
     }
   </script>
-
 </body>
 </html>
